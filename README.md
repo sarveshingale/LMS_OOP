@@ -39,7 +39,8 @@ Ensure you are in the top-level of the directory.
 
 ### User Interface
 Upon running the program, the following menu should be displayed:
-```UTA Central Library
+```
+UTA Central Library
 
 =========
 Main Menu
@@ -59,5 +60,6 @@ Files
 7) Load Test Data
 8) Save
 9) Load
-0) Exit```
+0) Exit
 
+Selection:
