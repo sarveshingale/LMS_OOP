@@ -29,12 +29,12 @@ Multi-threading has been implemented for these I/O-bound tasks to add to the res
 + Apache Ant: Install the Apache Ant build tool (Apache Ant(TM) version 1.10.12 was used).
 ### Running the Program
 1. Build the program by running the following command:
-   'ant'
+   `ant`
 2. Run the main class:
-   'java mdi.LibraryManager
+   `java mdi.LibraryManager`
 ### Test Files
-+ The publications test file that contains sample publication data is located in mdi/Publications.txt
-+ The patrons test file that contains sample patrons data is located in mdi/Patrons.txt
++ The publications test file that contains sample publication data is located in `mdi/Publications.txt`
++ The patrons test file that contains sample patrons data is located in `mdi/Patrons.txt`
 
 ### User Interface
 Upon running the program, the following menu should be displayed:
