@@ -1,7 +1,7 @@
 # LMS_OOP
 
 ## Project Overview
-LMS__OOP is a library management system developed with a strong emphasis on Object-Oriented Programming (OOP) principles. The system implements logic for managing library publications and patrons, supports file handling for saving and loading the system's state, and employs multi-threading to handle IO-bound tasks concurrently. Additionally, it includes a custom exception inheriting from ArithmeticException to enhance error handling.
+LMS__OOP is a library management system developed with a strong emphasis on Object-Oriented Programming (OOP) principles. The system implements logic for managing library publications and patrons, supports file handling for saving and loading the system's state, and employs multi-threading to handle I/O-bound tasks concurrently. Additionally, it includes a custom exception inheriting from ArithmeticException to enhance error handling.
 
 This system was developed over four sprints, each lasting one week, following Agile Methodology as part of a course project. Full Javadoc documentation has been implemented and can be generated using the provided run instructions.
 
@@ -33,6 +33,8 @@ Ensure you are in the top-level of the directory.
    `ant`
 2. Run the main class:
    `java mdi.LibraryManager`
+3. Generate documentation through javadoc:
+   `ant javadoc`
 ### Test Files
 + The publications test file that contains sample publication data is located in `mdi/Publications.txt`
 + The patrons test file that contains sample patrons data is located in `mdi/Patrons.txt`
