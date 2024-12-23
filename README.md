@@ -28,6 +28,7 @@ Multi-threading has been implemented for these I/O-bound tasks to add to the res
 + Java: Ensure Java is installed (Java 17 was used for development).
 + Apache Ant: Install the Apache Ant build tool (Apache Ant(TM) version 1.10.12 was used).
 ### Running the Program
+Ensure you are in the top-level of the directory.
 1. Build the program by running the following command:
    `ant`
 2. Run the main class:
