@@ -15,6 +15,8 @@ import library.Patron;
 import library.Library;
 import library.Video;
 import library.Video.InvalidRuntimeException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class LibraryManager {
 	
@@ -26,6 +28,7 @@ public class LibraryManager {
 	public LibraryManager(Library library) {
 		
 		this.library = library;
+		this.executorservice = Executors.newFixedThreadPool(2);
 	}
 	
 	// Instance methods
@@ -42,7 +45,7 @@ public class LibraryManager {
 		System.out.print("Selection: ");
 	}
 	
-	public void addPub(Scanner sc) {
+	public synchronized void addPub(Scanner sc) {
 		System.out.print("Enter Publication Title: ");
 		String title = sc.nextLine();
 		System.out.print("Enter Publication Author: ");
@@ -63,7 +66,7 @@ public class LibraryManager {
 		System.out.println("Publication Added Successfully\n");
 	}
 	
-	public void checkOutPub(Scanner sc) {
+	public synchronized void checkOutPub(Scanner sc) {
 		System.out.print("Which publication would you like to check out (Provide index): ");
 		int index = sc.nextInt();
 		sc.nextLine();
@@ -74,7 +77,7 @@ public class LibraryManager {
 		System.out.println("Publication has been Checked Out\n");
 	}
 	
-	public void checkInPub(Scanner sc) {
+	public synchronized void checkInPub(Scanner sc) {
 		System.out.print("Which publication would you like to check in (Provide index): ");
 		int index = sc.nextInt();
 		sc.nextLine();
@@ -82,11 +85,11 @@ public class LibraryManager {
 		System.out.println("Publication has been Checked In\n");
 	}
 	
-	public  void displayPatronMenu() {
+	public void displayPatronMenu() {
 		System.out.println(library.patronMenu());
 	}
 	
-	public void addPatron(Scanner sc) {
+	public synchronized void addPatron(Scanner sc) {
 		System.out.print("Please enter your name: ");
 		String name = sc.nextLine();
 		System.out.print("Please enter your email: ");
@@ -96,118 +99,124 @@ public class LibraryManager {
 		System.out.println("Patron has been Added\n");
 	}
 	
-	public void populateTestData(Scanner sc) {
+	public synchronized void populateTestData(Scanner sc) {
 	
 		// Populating publications from file
-		try(BufferedReader publicationFile = new BufferedReader(new FileReader("mdi/Publications.txt"))) {
-			String line;
-			while((line = publicationFile.readLine()) != null) {
-				
-				String strLine = line;
-				String[] lines;
-				lines = strLine.split(",");
-				if((lines.length != 3) && (lines.length !=4)) {
-					System.err.println("Lines in publication file formatted incorrectly");
-					continue;
-				}
-				
-				// Constructing Publication Object
-				if(lines.length == 3) {
-					try {
-						String title = lines[0].trim();
-						String author = lines[1].trim();
-						int copyright = Integer.parseInt(lines[2].trim());
-						library.addPublication(new Publication(title, author, copyright));
-					}
-					catch(IllegalArgumentException e) {
-						System.err.println(e.getMessage());
+		executorservice.submit(() -> {
+			try(BufferedReader publicationFile = new BufferedReader(new FileReader("mdi/Publications.txt"))) {
+				String line;
+				while((line = publicationFile.readLine()) != null) {
+					
+					String strLine = line;
+					String[] lines;
+					lines = strLine.split(",");
+					if((lines.length != 3) && (lines.length !=4)) {
+						System.err.println("Lines in publication file formatted incorrectly");
 						continue;
 					}
-				}
-				// Constructing Video Object
-				else if(lines.length == 4) {
-					try {
-						String title = lines[0].trim();
-						String author = lines[1].trim();
-						int copyright = Integer.parseInt(lines[2].trim());
-						int runtime = Integer.parseInt(lines[3].trim());
+					
+					// Constructing Publication Object
+					if(lines.length == 3) {
 						try {
-							library.addPublication(new Video(title, author, copyright, runtime));
+							String title = lines[0].trim();
+							String author = lines[1].trim();
+							int copyright = Integer.parseInt(lines[2].trim());
+							library.addPublication(new Publication(title, author, copyright));
 						}
-						catch(InvalidRuntimeException e) {
+						catch(IllegalArgumentException e) {
 							System.err.println(e.getMessage());
+							continue;
 						}
+					}
+					// Constructing Video Object
+					else if(lines.length == 4) {
+						try {
+							String title = lines[0].trim();
+							String author = lines[1].trim();
+							int copyright = Integer.parseInt(lines[2].trim());
+							int runtime = Integer.parseInt(lines[3].trim());
+							try {
+								library.addPublication(new Video(title, author, copyright, runtime));
+							}
+							catch(InvalidRuntimeException e) {
+								System.err.println(e.getMessage());
+							}
+						}
+						catch(IllegalArgumentException e) {
+							System.err.println(e.getMessage());
+							continue;
+						}
+					}
+					
+				}
+			}
+			catch(IOException e) {
+				System.err.println(e.getMessage());
+			}
+			
+			// Populating Patrons from file		
+			try(BufferedReader patronFile = new BufferedReader(new FileReader("mdi/Patrons.txt"))) {
+				String line;
+				while((line = patronFile.readLine()) != null) {
+					
+					String strLine = line;
+					String[] lines;
+					lines = strLine.split(",");
+					if(lines.length != 2) {
+						System.err.println("Lines in Patrons file formatted incorrectly");
+						continue;
+					}
+					
+					// Constructing Publication Object	
+					try {
+						String name = lines[0].trim();
+						String email = lines[1].trim();
+						library.addPatron(new Patron(name, email));
 					}
 					catch(IllegalArgumentException e) {
 						System.err.println(e.getMessage());
 						continue;
 					}
+					
 				}
-				
 			}
-		}
-		catch(IOException e) {
-			System.err.println(e.getMessage());
-		}
-		
-		// Populating Patrons from file		
-		try(BufferedReader patronFile = new BufferedReader(new FileReader("mdi/Patrons.txt"))) {
-			String line;
-			while((line = patronFile.readLine()) != null) {
-				
-				String strLine = line;
-				String[] lines;
-				lines = strLine.split(",");
-				if(lines.length != 2) {
-					System.err.println("Lines in Patrons file formatted incorrectly");
-					continue;
-				}
-				
-				// Constructing Publication Object	
-				try {
-					String name = lines[0].trim();
-					String email = lines[1].trim();
-					library.addPatron(new Patron(name, email));
-				}
-				catch(IllegalArgumentException e) {
-					System.err.println(e.getMessage());
-					continue;
-				}
-				
+			catch(IOException e) {
+				System.err.println(e.getMessage());
 			}
-		}
-		catch(IOException e) {
-			System.err.println(e.getMessage());
-		}
+		});
 	}
 	
-	public void saveLibrary(Scanner sc) {
+	public synchronized void saveLibrary(Scanner sc) {
 		System.out.print("Please Enter Name of file for saving library(+ extension): ");
 		String libraryFile = sc.nextLine();
-		
-		try(
-			BufferedWriter bw = new BufferedWriter(new FileWriter(libraryFile));
-		)
-		{							
-			library.save(bw);
-			System.out.println("Saved Succesfully\n");
-		}
-		catch(IOException e) {
-			System.err.println(e.getMessage());
-		}					
+		executorservice.submit(() -> {
+			try(
+				BufferedWriter bw = new BufferedWriter(new FileWriter(libraryFile));
+			)
+			{							
+				library.save(bw);
+				System.out.println("Saved Succesfully\n");
+			}
+			catch(IOException e) {
+				System.err.println(e.getMessage());
+			}	
+		});
 	}
 	
-	public void loadLibrary(Scanner sc) {
+	public synchronized void loadLibrary(Scanner sc) {
 		System.out.print("Please enter name of file you want to load from(+ extension): ");
 		String loadFile = sc.nextLine();
-		try(BufferedReader br = new BufferedReader(new FileReader(loadFile))) {
+		executorservice.submit(() -> {
 			
-			library = new Library(br);
-			System.out.println("Library Loaded Successfully\n");
-		}
-		catch(IOException e) {
-			System.err.println(e.getMessage());
-		}
+			try(BufferedReader br = new BufferedReader(new FileReader(loadFile))) {
+				
+				library = new Library(br);
+				System.out.println("Library Loaded Successfully\n");
+			}
+			catch(IOException e) {
+				System.err.println(e.getMessage());
+			}
+		});
 	}
 	
 	// MAIN METHOD
@@ -239,7 +248,7 @@ public class LibraryManager {
 				case 7 -> lm.populateTestData(sc);	
 				case 8 -> lm.saveLibrary(sc);
 				case 9 -> lm.loadLibrary(sc);
-				case 0 -> {}
+				case 0 -> lm.executorservice.shutdown();
 				default -> System.out.println("Invalid Selection");	
 			}
 		
@@ -248,4 +257,5 @@ public class LibraryManager {
 	}
 	
 	private Library library;
+	private ExecutorService executorservice;
 }
